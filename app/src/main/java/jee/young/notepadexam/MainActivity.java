@@ -4,8 +4,11 @@ import android.app.ListActivity;
 import android.database.Cursor;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.SimpleCursorAdapter;
 
 import java.sql.SQLException;
@@ -14,7 +17,12 @@ import java.sql.SQLException;
 public class MainActivity extends ListActivity {
 
     private NoteDBAdapter mDbAdapter;
+    private Cursor cursor;
+
+
     public static final int INSERT_ID = Menu.FIRST;
+    public static final int DELETE_ID = Menu.FIRST + 1;
+
     private int mNoteNumber = 1;
 
     @Override
@@ -26,6 +34,7 @@ public class MainActivity extends ListActivity {
         try {
             mDbAdapter.open();
             fillData();
+            registerForContextMenu(getListView());
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -33,7 +42,7 @@ public class MainActivity extends ListActivity {
     }
 
     private void fillData() {
-        Cursor cursor = mDbAdapter.fetchAllNotes();
+        cursor = mDbAdapter.fetchAllNotes();
         startManagingCursor(cursor);
 
         String[] from = new String[]{NoteDBAdapter.KEY_TITLE};
@@ -46,10 +55,37 @@ public class MainActivity extends ListActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-//        getMenuInflater().inflate(R.menu.menu_main, menu);
         boolean result = super.onCreateOptionsMenu(menu);
         menu.add(0, INSERT_ID, 0, "Add Item");
         return result;
+    }
+
+    @Override
+    public boolean onMenuItemSelected(int featureId, MenuItem item) {
+       switch (item.getItemId()){
+           case INSERT_ID:
+               createNote();
+               return true;
+       }
+        return super.onMenuItemSelected(featureId, item);
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        menu.add(0, DELETE_ID, 0, "Delete Note");
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case DELETE_ID:
+                AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+                mDbAdapter.deleteNote(info.id);
+                fillData();
+                return true;
+        }
+        return super.onContextItemSelected(item);
     }
 
     @Override
