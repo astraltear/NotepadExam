@@ -1,6 +1,7 @@
 package jee.young.notepadexam;
 
 import android.app.ListActivity;
+import android.content.Intent;
 import android.database.Cursor;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -9,12 +10,16 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 
 import java.sql.SQLException;
 
 
 public class MainActivity extends ListActivity {
+
+    private static final int ACTIVITY_CREATE = 0;
+    private static final int ACTIVITY_EDIT = 1;
 
     private NoteDBAdapter mDbAdapter;
     private Cursor cursor;
@@ -102,8 +107,55 @@ public class MainActivity extends ListActivity {
     }
 
     private void createNote() {
-        String noteName = "Note"+mNoteNumber++;
-        mDbAdapter.createNote(noteName, "");
-        fillData();
+//        String noteName = "Note"+mNoteNumber++;
+//        mDbAdapter.createNote(noteName, "");
+//        fillData();
+        Intent intent = new Intent(this,NoteEdit.class);
+        startActivityForResult(intent,ACTIVITY_CREATE);
+    }
+
+    @Override
+    protected void onListItemClick(ListView l, View v, int position, long id) {
+        super.onListItemClick(l, v, position, id);
+
+        Cursor cursor1 = cursor;
+        cursor1.moveToPosition(position);
+
+        Intent intent = new Intent(this, NoteEdit.class);
+        intent.putExtra(NoteDBAdapter.KEY_ROWID, id);
+        intent.putExtra(NoteDBAdapter.KEY_TITLE, cursor1.getString(cursor1.getColumnIndexOrThrow(NoteDBAdapter.KEY_TITLE)));
+        intent.putExtra(NoteDBAdapter.KEY_BODY, cursor1.getString(cursor1.getColumnIndexOrThrow(NoteDBAdapter.KEY_BODY)));
+
+        startActivityForResult(intent,ACTIVITY_EDIT);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+
+        if (intent != null){
+            Bundle extras = intent.getExtras();
+
+            switch (requestCode){
+                case ACTIVITY_CREATE:
+                    String title = extras.getString(NoteDBAdapter.KEY_TITLE);
+                    String body = extras.getString(NoteDBAdapter.KEY_BODY);
+                    mDbAdapter.createNote(title, body);
+                    fillData();
+                    break;
+
+                case ACTIVITY_EDIT:
+                    Long rowId = extras.getLong(NoteDBAdapter.KEY_ROWID);
+
+                    if(rowId != null) {
+                        String editTitle = extras.getString(NoteDBAdapter.KEY_TITLE);
+                        String editBody = extras.getString(NoteDBAdapter.KEY_BODY);
+                        mDbAdapter.updateNote(rowId, editTitle, editBody);
+                    }
+
+                    fillData();
+                    break;
+            }
+        }
     }
 }
