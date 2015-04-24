@@ -3,7 +3,6 @@ package jee.young.notepadexam;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.database.Cursor;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.Menu;

@@ -3,6 +3,7 @@ package jee.young.notepadexam;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
@@ -23,6 +24,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+
+        Log.d(getClass().getSimpleName(), "oldVersion[" + oldVersion + "]newVersion[" + newVersion + "]");
+
         db.execSQL("drop table if exists notes");
         onCreate(db);
     }
