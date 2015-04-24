@@ -23,7 +23,6 @@ public class MainActivity extends ListActivity {
     private NoteDBAdapter mDbAdapter;
     private Cursor cursor;
 
-
     public static final int INSERT_ID = Menu.FIRST;
     public static final int DELETE_ID = Menu.FIRST + 1;
 
